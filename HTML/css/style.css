@@ -1,0 +1,116 @@
+body, html {
+    margin: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.text {
+    font-size: 18px;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+.text-header {
+    height: 0px;
+    display: flex;
+    font-size: 18pt;
+    margin-top: 25px;
+    margin-bottom: 40px;
+    justify-content: center;
+}
+
+.horizontal-line-bold {
+    width: 95%;
+    height: 0px;
+    margin-top: 40px;
+    border: 1px solid black;
+}
+
+.horizontal-line {
+    height: 0px;
+    width: 93.5%;
+    margin-top: -15px;
+}
+
+.block {
+    margin: 10px;
+    min-width: 0px;
+    max-width: 1000px;
+    box-shadow: 0px 0px 25px lightgray;
+    border: 1px solid rgb(205, 205, 205);
+    background-color: rgb(240, 240, 240);
+}
+
+.btn {
+    background-color: rgb(240, 240, 240);
+    border: 1px solid rgb(205, 205, 205);
+    transition: transform 0.2s ease, background-color 0.2s ease, color ease 0.2s;
+}
+
+.btn:hover, .btn:focus {
+    color: white;
+    cursor: pointer;
+    transform: scale(0.95, 0.95);
+    background-color: crimson;
+}
+
+.btn:active {
+    transform: scale(0.90, 0.90);
+}
+
+.btn-copy {
+    color: white;
+    border: none;
+    font-size: 17px;
+    background-color: transparent;
+}
+
+.btn-copy:hover {
+    cursor: pointer;
+    background-color: rgb(47, 47, 47);
+}
+
+.btn-copied {
+    color: white;
+    border: none;
+    font-size: 17px;
+    background-color: transparent;
+}
+
+.code-section {
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 17px;
+    box-shadow: 2px 2px 2px lightgray;
+    border: 1px solid rgb(205, 205, 205);
+    background-color: rgb(230, 230, 230);
+}
+
+.keyword-type {
+    color: rgb(136, 0, 0);
+}
+
+.keyword-arg {
+    color: rgb(192, 132, 132);
+}
+
+.keyword-class {
+    color: purple;
+}
+
+.keyword-comment {
+    color: green;
+}
+
+.keyword-blue {
+    color: blue;
+}
