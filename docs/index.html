@@ -28,8 +28,8 @@
                     <br><br>
                     В будущем планируется доработка модуля и последующее добавление новых функций для более гибкого взаимодействия с базой данных библиотеки.
                     <br><br>
-                    Версия документации: <b>0.1</b><br>
-                    Версия библиотек (модулей): <b>0.1</b><br>
+                    Версия документации: <b>0.2</b><br>
+                    Версия библиотек (модулей): <b>0.2</b><br>
                     <br><b>P.S:</b> Модуль <i>kapi32u (utils).dll</i> необходим для выполнения специфических задач, таких как получение пароля от БД из памяти программы. 
                     Возможно это можно сделать каким-то иным путём, но пока я нашёл только это решение данной проблемы.
                 </p>
@@ -49,6 +49,7 @@
                         <li><a href="#EnumFields">EnumFields</a> - Позволяет перечислить и получить имена всех полей, которые находятся в таблице, указанной в аргументе функции. Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
                         <li><a href="#GetFieldCount">GetFieldCount</a> - Позволяет получить количество полей в таблице, указанной в аргументе функции. Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
                         <li><a href="#SelectAllFrom">SelectAllFrom</a> - Извлекает все данные таблицы вместе с полями через запрос "<i>SELECT * FROM `TableName`;</i>". Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
+                        <li><a href="#CreateCustomQuery">CreateCustomQuery</a> - Позволяет выполнять кастомные запросы к базе данных. Для примера "<i>SELECT `id`, `Password`, `UserPC` FROM `Librarians`;</i>". Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
                         <li><a href="#UnloadTable">UnloadTable</a> - Позволяет выгрузить все записи таблицы вместе с полями в какой-либо файл с определёнными разделителями. Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
                         <li><a href="#GetTableRecords">GetTableRecords</a> - Получает количество записей в таблице, указанной в аргументе функции. Всегда должна выполняться после вызова <b><i>OpenDataBase</i></b>;</li>
                         <li><a href="#CloseDataBase">CloseDataBase</a> - Закрывает соединение с базой данных. Должна вызываться после завершения работы с базой данных.</li>
@@ -80,7 +81,12 @@
                 <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 15px;">
                     <ul style="margin-left: 5%; margin-right: 5%;">
                         <li><a href="#kapi32.dll">Работа с kapi32.dll</a> - Раздел с описанием и примерами работы с библиотекой <b><i>kapi32.dll</i></b>;</li>
-                        <li><a href="#kapi32u.dll">Работа с kapi32u.dll</a> - Раздел с описанием и примерами работы с библиотекой <b><i>kapi32u.dll</i></b>.</li>
+                        <li><a href="#kapi32u.dll">Работа с kapi32u.dll</a> - Раздел с описанием и примерами работы с библиотекой <b><i>kapi32u.dll</i></b>;</li>
+                        <li><a href="#ExportCalling">Вызов функций экспорта на других языках</a> - Раздел с описанием и примерами вызова функций экспорта на других языках.</li>
+                        <ul style="margin-top: 5px; margin-bottom: -15px;">
+                            <li><a href="#C++Example">Пример вызова на C++;</a></li>
+                            <li><a href="#PythonExample">Пример вызова на Python.</a></li>
+                        </ul>
                     </ul>
                 </p>
 
@@ -861,6 +867,181 @@
                 <!-- Конец 7 -->
 
                 <!-- Начало 8 -->
+                <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="CreateCustomQuery">CreateCustomQuery</a></b></p>
+                <hr class="horizontal-line">
+                <div class="code-section">
+                    <p class="text">
+                        <span class="keyword-type">string</span> CreateCustomQuery(<span class="keyword-arg">string</span> strQuery);
+                    </p>
+                </div>
+                <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 15px;">
+                    Позволяет выполнять кастомные запросы к базе данных. Для примера "<i>SELECT `id`, `Password`, `UserPC` FROM `Librarians`;</i>".
+                    <br>
+                    Возвращаемый результат:
+                    <ul style="margin-left: 5%;">
+                        <li>В случае успеха возвращает текст, а именно таблицу, где каждое из полей разделено знаком тябуляции "<b>\t</b>";</li>
+                        <li>В случае неудачи возвращает <span class="keyword-blue">null</span> или сообщение об ошибке, которая обрабатывается в операторе <span class="keyword-class">catch</span>.
+                        <br><br>
+                        Если функция вернула значение <span class="keyword-blue">null</span>, Вы не 
+                        сможете проверить его при помощи свойства <b><i>.Length</i></b>, для этого <br>Вы можете проверить результат возврата через оператор сравнения: 
+                    <b><i>!= null</i></b> или метода <b><i>string.IsNullOrEmpty</i></b>.
+                    <br><br>
+                    Также, в случаях если Ваш <i><b>SQL-запрос</b></i> был сформирован неправильно, функция вернёт Вам текст сообщения, который генерируется по умолчанию оператором <span class="keyword-class">catch</span>, 
+                    с информацией об ошибке, которая возникла при выполнении запроса к базе данных. 
+                    <br><br>
+                    Помимо сообщения об ошибке, в начале строки будет дописано поле "<i><b>[kapi32_ccq_error]:</b>"</i>, которое затем можно <br>будет проверять при помощи метода строки <b><i>.IndexOf</i></b> или метода <b><i>.Contains</i></b>.
+                    </ul>
+                </p>
+                <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 15px;">
+                    Аргументы:
+                    <ol style="margin-left: 5%;">
+                        <li ><b style="background-color: rgb(215, 215, 215);">[in] strQuery</b> - Ваш кастомный запрос к определённой таблице в базе данных. Для примера "<i>SELECT `id`, `Password`, `UserPC` FROM `Librarians`;</i>".</li>
+                        <br>
+                        Вы можете составлять любые запросы, включая такие ключевые слова как <span class="keyword-class">WHERE</span>, <span class="keyword-class">CASE</span>, <span class="keyword-class">CONCAT</span>, <span class="keyword-class">INNER JOIN</span>, 
+                        <span class="keyword-class">LEFT JOIN</span>, <span class="keyword-class">RIGHT JOIN</span>, <span class="keyword-class">ON</span> и другие. Вообщем, весь функционал стандартного <i><b>SQL</b></i>. 
+                        <br><br>
+                        Получить перечень таблиц и их поля можно через вызов функций <i><b>EnumTables</b></i> и <i><b>EnumFields</b></i>.
+                    </ol>
+                </p>
+                <div class="code-section cancopy" style="background-color: rgb(215, 215, 215);">
+                    <p style="margin-top: 0px; margin-left: 0px; padding-left: 10px; padding-top: 5px; background-color: rgb(125, 125, 125); color: white; display: flex; height: 23px;">C# - Пример импорта
+                        <!-- Trash -->
+                        <input type="button" class="btn-copy" style="width: 23px; height: 23px; padding: 0; margin-left: 80%; margin-top: -2px;" value="🗐" title="Копировать">
+                    </p> 
+                    <p class="text">
+                        <pre style="margin-left: 3%; margin-right: 3%;">
+[<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+<span class="keyword-type">extern public static string</span> CreateCustomQuery(<span class="keyword-arg">string</span> strQuery);
+</pre>
+                    </p>
+                </div>
+                <div class="code-section cancopy" style="background-color: rgb(215, 215, 215);">
+                    <p style="margin-top: 0px; margin-left: 0px; padding-left: 10px; padding-top: 5px; background-color: rgb(125, 125, 125); color: white; display: flex; height: 23px;">C# - Пример кода
+                        <!-- Trash -->
+                        <input type="button" class="btn-copy" style="width: 23px; height: 23px; padding: 0; margin-left: 83.2%; margin-top: -2px;" value="🗐" title="Копировать">
+                    </p> 
+                    <p class="text">
+                        <pre style="margin-left: 3%; margin-right: 3%;">
+<span class="keyword-blue">using</span> System;
+<span class="keyword-blue">using</span> System.Text;
+<span class="keyword-blue">using</span> System.Runtime.InteropServices;
+
+<span class="keyword-blue">namespace</span> KabisAPITest
+{
+    <span class="keyword-blue">internal class</span> Program
+    {
+        <span class="keyword-comment">/* Тут находятся все функции экспорта, которые содержит библиотека kapi32.dll и kapi32u.dll */</span>
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32u.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static <span class="keyword-arg">IntPtr</span></span> ScanForPass(<span class="keyword-arg">string</span> strAppName);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> PtrToStr(<span class="keyword-arg">IntPtr</span> intPtr);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static bool</span> OpenDataBase(<span class="keyword-arg">string</span> strDataBase, <span class="keyword-arg">string</span> strPassword);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> EnumTables();
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static int</span> GetTableCount();
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> EnumFields(<span class="keyword-arg">string</span> strTable);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static int</span> GetFieldCount(<span class="keyword-arg">string</span> strTable);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> SelectAllFrom(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">bool</span> bOutput);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> CreateCustomQuery(<span class="keyword-arg">string</span> strQuery);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> UnloadTable(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">string</span> strFile, <span class="keyword-arg">int</span> iType, <span class="keyword-arg">bool</span> bOutput);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static int</span> GetTableRecords(<span class="keyword-arg">string</span> strTable);
+        
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static bool</span> CloseDataBase();
+
+        <span class="keyword-blue">static void</span> Main(<span class="keyword-arg">string[]</span> args)
+        {
+            <span class="keyword-class">Console</span>.InputEncoding = Encoding.<span class="keyword-class">UTF8</span>;
+            <span class="keyword-class">Console</span>.OutputEncoding = Encoding.<span class="keyword-class">UTF8</span>;
+
+            <span class="keyword-blue">if</span> (OpenDataBase(<span class="keyword-arg">"C:\\KABIS\\Data\\Books.dbx"</span>, PtrToStr(ScanForPass(<span class="keyword-arg">"C:\\KABIS\\KABIS.EXE"</span>))))
+            {
+                <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"База данных была успешно открыта!"</span>);
+
+                <span class="keyword-comment">//Выполняем кастомный запрос, чтобы получить таблицу с указанными полями</span>
+                <span class="keyword-blue">string</span> strQuery = CreateCustomQuery(<span class="keyword-arg">"SELECT `id`, `Password`, `UserPC` FROM `Librarians`;"</span>);
+
+                <span class="keyword-blue">if</span> (!<span class="keyword-blue">string</span>.IsNullOrEmpty(strQuery))
+                    <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"---------------------------------\n"</span> + strQuery);
+                <span class="keyword-blue">else</span>
+                    <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"Произошла ошибка во время выполнения кастомного запроса!"</span>);
+
+                <span class="keyword-blue">if</span> (CloseDataBase())
+                {
+                    <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"---------------------------------"</span>);
+                    <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"Соединение с базой данных было закрыто."</span>);
+                }
+            }
+            <span class="keyword-blue">else</span>
+                <span class="keyword-class">Console</span>.WriteLine(<span class="keyword-arg">"Не удалось открыть базу данных."</span>);
+
+            <span class="keyword-class">Console</span>.ReadKey();
+        }
+    }
+}</pre>
+                    </p>
+                </div>
+                <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 25px;">
+                    <big><b>РЕЗУЛЬТАТ ВЫЗОВА ФУНКЦИИ</b>:</big>
+                    <br>
+                    Ниже представлен результат <i><b>успешного выполнения функции</b></i> с указанным кастомным запросом к базе данных. Вы можете составлять любые запросы к базе данных, <i><b>комбинируя их с другими ключевыми словами</b></i>.
+                    <br>
+                    <div class="console-section">
+                        <p style="margin-top: 0px; margin-left: 0px; padding-left: 10px; padding-top: 5px; background-color: rgb(42, 42, 42); color: white; display: flex; height: 23px;">🛠️ Командная строка
+                            <!-- Trash -->
+                        </p>
+                        <p class="text">
+                            <pre style="margin-left: 3%; margin-right: 3%; color: white;">
+База данных была успешно открыта!
+---------------------------------
+id      Password        UserPC
+1       kabis   DESKTOP-AE57DMC
+2               LIBRARY-PC
+3       12345   LIB-LIBRARY
+4       1234579 LIBRARY-PC
+5       12345   KABIS
+6       12345   PC-82178739E0
+7       12345   User
+10      12345
+11      12345
+12      12345
+13      12345
+14      12345
+15      1234
+16      1234
+17      1234
+18      1234
+19      1234
+20      1234
+
+---------------------------------
+Соединение с базой данных было закрыто.
+_</pre>
+                        </p>
+                    </div>
+                </p>
+                <!-- Конец 8 -->
+
+                <!-- Начало 9 -->
                 <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="UnloadTable">UnloadTable</a></b></p>
                 <hr class="horizontal-line">
                 <div class="code-section">
@@ -990,9 +1171,9 @@
 }</pre>
                     </p>
                 </div>
-                <!-- Конец 8 -->
+                <!-- Конец 9 -->
 
-                <!-- Начало 9 -->
+                <!-- Начало 10 -->
                 <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="GetTableRecords">GetTableRecords</a></b></p>
                 <hr class="horizontal-line">
                 <div class="code-section">
@@ -1100,9 +1281,9 @@
 }</pre>
                     </p>
                 </div>
-                <!-- Конец 9 -->
+                <!-- Конец 10 -->
 
-                <!-- Начало 10 -->
+                <!-- Начало 11 -->
                 <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="CloseDataBase">CloseDataBase</a></b></p>
                 <hr class="horizontal-line">
                 <div class="code-section">
@@ -1176,6 +1357,9 @@
         <span class="keyword-type">extern public static string</span> SelectAllFrom(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">bool</span> bOutput);
 
         [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> CreateCustomQuery(<span class="keyword-arg">string</span> strQuery);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
         <span class="keyword-type">extern public static string</span> UnloadTable(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">string</span> strFile, <span class="keyword-arg">int</span> iType, <span class="keyword-arg">bool</span> bOutput);
 
         [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
@@ -1213,7 +1397,7 @@
                     одну экспортируемую функцию. Которая выполняет своё главное действие только один раз. Более подробнее написано в описании к функции.
                 </p>
 
-                <!-- Начало 10 -->
+                <!-- Начало 12 -->
                 <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="ScanForPass">ScanForPass</a></b></p>
                 <hr class="horizontal-line">
                 <div class="code-section">
@@ -1320,6 +1504,9 @@
         <span class="keyword-type">extern public static string</span> SelectAllFrom(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">bool</span> bOutput);
 
         [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
+        <span class="keyword-type">extern public static string</span> CreateCustomQuery(<span class="keyword-arg">string</span> strQuery);
+
+        [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
         <span class="keyword-type">extern public static string</span> UnloadTable(<span class="keyword-arg">string</span> strTable, <span class="keyword-arg">string</span> strFile, <span class="keyword-arg">int</span> iType, <span class="keyword-arg">bool</span> bOutput);
 
         [<span class="keyword-class">DllImport</span>(<span class="keyword-arg">"kapi32.dll"</span>, CallingConvention = <span class="keyword-class">CallingConvention</span>.StdCall)]
@@ -1352,7 +1539,155 @@
 }</pre>
                     </p>
                 </div>
-                <!-- Конец 11 -->
+                <!-- Конец 12 -->
+
+                <hr class="horizontal-line-bold">
+                <p class="text" style="font-size: 32px;"><a name="ExportCalling">[+] Вызов функций экспорта на других языках</a></p>
+                <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 15px;">Также, Вы можете импортировать функции экспорта 
+                    в свою программу и на других языках программирования, таких как C++ или Python, чтобы выполнять все доступные действия с 
+                    базой данных КАБИС.
+                </p>
+
+                <!-- Начало 13 -->
+                <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="C++Example">С++</a></b></p>
+                <hr class="horizontal-line">
+                <div class="code-section cancopy" style="background-color: rgb(215, 215, 215);">
+                    <p style="margin-top: 0px; margin-left: 0px; padding-left: 10px; padding-top: 5px; background-color: rgb(125, 125, 125); color: white; display: flex; height: 23px;">C++ - Пример кода
+                        <!-- Trash -->
+                        <input type="button" class="btn-copy" style="width: 23px; height: 23px; padding: 0; margin-left: 82%; margin-top: -2px;" value="🗐" title="Копировать">
+                    </p> 
+                    <p class="text">
+                        <pre style="margin-left: 3%; margin-right: 3%;">
+<span class="keyword-gray">#include</span> <span class="keyword-arg">&lt;iostream&gt;</span>
+<span class="keyword-gray">#include</span> <span class="keyword-arg">&lt;string&gt;</span>
+<span class="keyword-gray">#include</span> <span class="keyword-arg">&lt;string.h&gt;</span>
+<span class="keyword-gray">#include</span> <span class="keyword-arg">&lt;Windows.h&gt;</span>
+
+<span class="keyword-blue">using namespace</span> std;
+
+<span class="keyword-comment">//Создаём прототипы импортируемых функций</span>
+<span class="keyword-blue">typedef const char</span>* (<span class="keyword-blue">__stdcall</span>* <span class="keyword-ocean">ScanForPassFn</span>)(<span class="keyword-blue">const char</span>* cchAppName);
+<span class="keyword-ocean">ScanForPassFn</span> ScanForPass;
+
+<span class="keyword-blue">typedef bool</span> (<span class="keyword-blue">__stdcall</span>* <span class="keyword-ocean">OpenDataBaseFn</span>)(<span class="keyword-blue">const char</span>* cchDataBase, <span class="keyword-blue">const char</span>* cchPassword);
+<span class="keyword-ocean">OpenDataBaseFn</span> OpenDataBase;
+
+<span class="keyword-blue">typedef const char</span>* (<span class="keyword-blue">__stdcall</span>* <span class="keyword-ocean">UnloadTableFn</span>)(<span class="keyword-blue">const char</span>* cchTable, <span class="keyword-blue">const char</span>* cchFile, <span class="keyword-blue">int</span> iType, <span class="keyword-blue">bool</span> bOutput);
+<span class="keyword-ocean">UnloadTableFn</span> UnloadTable;
+
+<span class="keyword-blue">typedef bool</span> (<span class="keyword-blue">__stdcall</span>* <span class="keyword-ocean">CloseDataBaseFn</span>)();
+<span class="keyword-ocean">CloseDataBaseFn</span> CloseDataBase;
+
+<span class="keyword-blue">int</span> main()
+{
+	setlocale(<span class="keyword-class">LC_ALL</span>, <span class="keyword-arg">""</span>);
+
+	<span class="keyword-ocean">HMODULE</span> hKapi32 = LoadLibraryA(<span class="keyword-arg">"kapi32.dll"</span>);
+	<span class="keyword-ocean">HMODULE</span> hKapi32u = LoadLibraryA(<span class="keyword-arg">"kapi32u.dll"</span>);
+
+	<span class="keyword-blue">if</span> (hKapi32 && hKapi32u)
+	{
+		ScanForPass = (<span class="keyword-ocean">ScanForPassFn</span>)GetProcAddress(hKapi32u, <span class="keyword-arg">"ScanForPass"</span>);
+		OpenDataBase = (<span class="keyword-ocean">OpenDataBaseFn</span>)GetProcAddress(hKapi32, <span class="keyword-arg">"OpenDataBase"</span>);
+		UnloadTable = (<span class="keyword-ocean">UnloadTableFn</span>)GetProcAddress(hKapi32, <span class="keyword-arg">"UnloadTable"</span>);
+		CloseDataBase = (<span class="keyword-ocean">CloseDataBaseFn</span>)GetProcAddress(hKapi32, <span class="keyword-arg">"CloseDataBase"</span>);
+
+		<span class="keyword-comment">//Лучше сделать массив и проверить всё это в цикле</span>
+		<span class="keyword-blue">if</span> (ScanForPass && OpenDataBase
+			&& UnloadTable && CloseDataBase)
+		{
+			<span class="keyword-blue">if</span> (OpenDataBase(<span class="keyword-arg">"C:\\KABIS\\Data\\Books.dbx"</span>, ScanForPass(<span class="keyword-arg">"C:\\KABIS\\KABIS.EXE"</span>)))
+			{
+				cout << <span class="keyword-arg">"База данных была успешно открыта!\n"</span>;
+				<span class="keyword-blue">string</span> strTable = UnloadTable(<span class="keyword-arg">"Librarians"</span>, <span class="keyword-blue">nullptr</span>, 0, <span class="keyword-blue">false</span>);
+
+				<span class="keyword-blue">if</span> (!strTable.empty())
+					cout << strTable << <span class="keyword-arg">"\n"</span>;
+				<span class="keyword-blue">else</span>
+					cout << <span class="keyword-arg">"Не удалось выгрузить таблицу.\n"</span>;
+
+				<span class="keyword-blue">if</span> (CloseDataBase())
+					cout << <span class="keyword-arg">"Соединение с базой данных было закрыто.\n"</span>;
+			}
+			<span class="keyword-blue">else</span>
+				cout << <span class="keyword-arg">"Не удалось открыть базу данных.\n"</span>;
+		}
+		<span class="keyword-blue">else</span>
+			cout << <span class="keyword-arg">"Не удалось получить адреса одной или нескольких функций.\n"</span>;
+	}
+	<span class="keyword-blue">else</span>
+		cout << <span class="keyword-arg">"Не удалось загрузить один или несколько модулей в процесс.\n"</span>;
+
+	system(<span class="keyword-arg">"pause"</span>);
+	<span class="keyword-class">return</span> 0;
+}</pre>
+                    </p>
+                </div>
+                <!-- Конец 13 -->
+
+                <!-- Начало 14 -->
+                <p class="text" style="font-size: 22px; margin-top: 40px;"><b><a name="PythonExample">Python</a></b></p>
+                <hr class="horizontal-line">
+                <div class="code-section cancopy" style="background-color: rgb(215, 215, 215);">
+                    <p style="margin-top: 0px; margin-left: 0px; padding-left: 10px; padding-top: 5px; background-color: rgb(125, 125, 125); color: white; display: flex; height: 23px;">Python - Пример кода
+                        <!-- Trash -->
+                        <input type="button" class="btn-copy" style="width: 23px; height: 23px; padding: 0; margin-left: 80%; margin-top: -2px;" value="🗐" title="Копировать">
+                    </p> 
+                    <p class="text">
+                        <pre style="margin-left: 3%; margin-right: 3%;">
+<span class="keyword-class">import</span> <span class="keyword-ocean">ctypes</span> <span class="keyword-class">as</span> <span class="keyword-ocean">lib</span>
+
+kapi32 = <span class="keyword-ocean">lib.WinDLL</span>(<span class="keyword-arg">"C:\\PyKapi32\\kapi32.dll"</span>)
+kapi32u = <span class="keyword-ocean">lib.WinDLL</span>(<span class="keyword-arg">"C:\\PyKapi32\\kapi32u.dll"</span>)
+
+ScanForPass = kapi32u.ScanForPass
+ScanForPass.restype = <span class="keyword-ocean">lib.c_char_p</span>
+ScanForPass.argtypes = [<span class="keyword-ocean">lib.c_char_p</span>]
+
+OpenDataBase = kapi32.OpenDataBase
+OpenDataBase.restype = <span class="keyword-ocean">lib.c_bool</span>
+OpenDataBase.argtypes = [<span class="keyword-ocean">lib.c_char_p</span>, <span class="keyword-ocean">lib.c_char_p</span>]
+
+UnloadTable = kapi32.UnloadTable
+UnloadTable.restype = <span class="keyword-ocean">lib.c_char_p</span>
+UnloadTable.argtypes = [<span class="keyword-ocean">lib.c_char_p</span>, <span class="keyword-ocean">lib.c_char_p</span>, <span class="keyword-ocean">lib.c_int</span>, <span class="keyword-ocean">lib.c_bool</span>]
+
+CloseDataBase = kapi32.CloseDataBase
+CloseDataBase.restype = <span class="keyword-ocean">lib.c_bool</span>
+
+<span class="keyword-class">if</span> (ScanForPass != 0
+    <span class="keyword-blue">and</span> OpenDataBase != 0
+    <span class="keyword-blue">and</span> UnloadTable != 0
+    <span class="keyword-blue">and</span> CloseDataBase != 0):
+    DataBase = <span class="keyword-blue">b</span><span class="keyword-arg">"C:\\KABIS\\Data\\Books.dbx"</span>
+    Password = ScanForPass(<span class="keyword-blue">b</span><span class="keyword-arg">"C:\\KABIS\\KABIS.EXE"</span>)
+
+    <span class="keyword-class">if</span> (len(Password) > 0):
+        <span class="keyword-class">if</span> (OpenDataBase(DataBase, Password)):
+            print(<span class="keyword-arg">"База данных была успешно открыта!"</span>)
+            Table = UnloadTable(<span class="keyword-blue">b</span><span class="keyword-arg">"Librarians"</span>, <span class="keyword-blue">b</span><span class="keyword-arg">""</span>, 0, <span class="keyword-blue">False</span>).decode(<span class="keyword-arg">"cp1251"</span>)
+
+            <span class="keyword-class">if</span> (len(Table) > 0):
+                print(Table)
+            <span class="keyword-class">else:</span>
+                print(<span class="keyword-arg">"Не удалось выгрузить таблицу из базы данных."</span>)
+        
+        <span class="keyword-class">if</span> (CloseDataBase()):
+            print(<span class="keyword-arg">"База данных была успешно закрыта!"</span>)
+<span class="keyword-class">else:</span>
+    print(<span class="keyword-arg">"Не удалось получить адрес одной или нескольких функций."</span>)
+
+input(<span class="keyword-arg">"Нажмите клавишу Enter или Ctrl + C для завершения выполнения программы...\n"</span>)</pre>
+                    </p>
+                </div>
+                <p class="text" style="font-size: 18px; margin-left: 5%; margin-top: 25px;">
+                    <big><b>ВНИМАНИЕ!</b></big>
+                    <br>
+                    Ваше приложение должно быть <big><b>x32-битной</b></big> разрядности, иначе ни одна из библиотек не будет работать или при запуске 
+                    программы у Вас будет возникать ошибка различий совместимости библиотеки и приложения.
+                    <br>
+                </p>
+                <!-- Конец 14 -->
                  
                 <div style="margin-bottom: 40px;"></div>
                 <hr class="horizontal-line">

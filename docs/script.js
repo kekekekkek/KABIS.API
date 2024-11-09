@@ -16,8 +16,16 @@ for (let i = 0; i < document.getElementsByClassName("btn-copy").length; i++)
         this.value = "✔️";
         this.className = "btn-copied";
 
-        var strValue = document.getElementsByClassName("code-section cancopy")[i].innerText.replace("C# - Пример импорта\n\n", "");    
-        (strValue.indexOf("C# - Пример кода") != -1 ? strValue = strValue.replace("C# - Пример кода\n\n", "") : strValue = strValue.slice(0, (strValue.length - 1)));
+        var strValue = document.getElementsByClassName("code-section cancopy")[i].innerText.replace("C# - Пример импорта\n\n", "");
+
+        if (strValue.indexOf("Python - Пример кода") == -1)
+        {
+            (strValue.indexOf("C++ - Пример кода") == -1 ? strValue.indexOf("C# - Пример кода") != -1 ? strValue = strValue.replace("C# - Пример кода\n\n", "") 
+                : strValue = strValue.slice(0, (strValue.length - 1)) : strValue.indexOf("C++ - Пример кода") != -1 ? strValue = strValue.replace("C++ - Пример кода\n\n", "") 
+                    : strValue = strValue.slice(0, (strValue.length - 1)));
+        }
+        else
+            strValue = strValue.replace("Python - Пример кода", "");
 
         navigator.clipboard.writeText(strValue);
         setTimeout(() => {
