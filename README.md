@@ -153,7 +153,7 @@ extern public static IntPtr ScanForPass(string strAppName);
 `Bk_GUID`, `Deleting`, `SortStr`, `RecDate`, `CopyCnt`, `Desc_77`, `ID_Librarian2`, но не содержит дополнительных полей, таких как `Desc_25` или `Desc_32`, которые содержат дополнительную 
 информацию к описанию книжной записи.<br><br>
 Для решения данной проблемы, Вы можете установить взаимосвязь между таблицами, используя ключевое слово `JOIN` при выполнении *SQL-запроса*.<br><br>
-Для выполнения кастомных запросов к базе данных можно использовать вызов функции `CreateCustomQuery` с переданным в неё кастомным запросом.<br><br>
+Для выполнения кастомных запросов к базе данных можно использовать вызов функции [`CreateCustomQuery`](https://kekekekkek.github.io/KABIS.API/#CreateCustomQuery) с переданным в неё кастомным запросом.<br><br>
 Наглядную взаимосвязь таблиц можно увидеть на скриншотах ниже:<br><br>
 ![Screenshot_9](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_9.png)<br><br>
 ![Screenshot_10](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_10.png)
