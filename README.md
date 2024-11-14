@@ -157,6 +157,109 @@ extern public static IntPtr ScanForPass(string strAppName);
 Наглядную взаимосвязь таблиц можно увидеть на скриншотах ниже:<br><br>
 ![Screenshot_9](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_9.png)<br><br>
 ![Screenshot_10](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_10.png)
+## Пример вывода других полей книжной записи
+Получение дополнительных полей для книжной записи в программе **КАБИС** происходит следующим образом:
+1. При открытии библиотечной записи в интерфейсе, программа `КАБИС` выполняет запрос к таблице `BookDesc` по `ID_Book` в которой хранятся все дополнительные поля библиотечной записи, как это можно видеть на скриншотах выше;
+2. После получения полей `ID_Desc`, `DescRepNum` и `ID_Text` из таблицы `BookDesc`, программа выполняет запрос к таблицам с наименованием `ZDesc_%` (*эти таблицы соответствуют дополнительным полям с описанием для библиографической записи*), где результат с `ID_Desc` соответствует номеру поля, которое необходимо отобразить, а поле `ID_Text` соответствует библиотечной записи (книге), где `ID_Text` для определённой книги соответствует его полю `ID_Desc`;
+3. После выполнения этих запросов мы и можем видеть тот результат, что продемонстрирован на скриншотах выше. Если Вы хотите извлекать всю дополнительную информацию о книге, включая количество страниц и прочую информацию, можно выполнять подобные запросы с использованием функции `CreateCustomQuery`, что представлены ниже. Пример выполнения запросов внутри программы `КАБИС`:<br><br>
+![Screenshot_11](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_11.png)<br><br>
+![Screenshot_12](https://github.com/kekekekkek/KABIS.API/blob/main/Images/Screenshot_12.png)
+### Пример кода на C#:
+```C#
+...
+public static string[] ParseColumn(string strResult, string strColumn)
+{
+    bool bFind = true;
+    string[] strValues = new string[0];
+
+    if (!string.IsNullOrEmpty(strResult)
+        && !string.IsNullOrEmpty(strColumn))
+    {
+        int iLine = 0;
+        int iCurTab = 0, iSaveTab = 0;
+        int iIndex = strResult.IndexOf(strColumn);
+
+        if (iIndex != -1)
+        {
+            for (int i = 0; i < strResult.Length; i++)
+            {
+                if (strResult[i] == '\t')
+                {
+                    if (bFind)
+                        iSaveTab++;
+                    
+                    iCurTab++;
+                    continue;
+                }
+
+                if (strResult[i] == '\r'
+                    || strResult[i] == '\n')
+                {
+                    iLine++;
+                    iCurTab = 0;
+
+                    Array.Resize(ref strValues, (strValues.Length + 1));
+                    continue;
+                }
+
+                if (i == iIndex)
+                {
+                    bFind = false;
+                    continue;
+                }
+
+                if (iLine > 0)
+                {
+                    if (iCurTab == iSaveTab)
+                        strValues[(strValues.Length - 1)] += strResult[i];
+                }
+            }
+        }
+    }
+
+    return strValues;
+}
+...
+...
+if (KAPI32.OpenDataBase(strDBPath, strDBPass))
+{
+    Console.WriteLine("База данных была успешно открыта!");
+
+    //Выполняем запрос для получения id всех полей для текущей книжной записи по её ID_Book (Как пример - это книга под номером 3588)
+    string strResult = KAPI32.CreateCustomQuery("SELECT ID_Desc, DescRepNum, ID_Text FROM BookDesc WHERE ID_Book=3588");
+
+    /*Также, я написал небольшую функцию парсинга (находится выше), которая парсит значения для определённого 
+     * поля исходя из структуры возврата функции CreateCustomQuery (В будущем постараюсь сделать удобней)*/
+
+    string[] strDesc = ParseColumn(strResult, "ID_Desc");
+    string[] strText = ParseColumn(strResult, "ID_Text");
+
+    if (strDesc.Length > 0
+        && strText.Length > 0)
+    {
+        //Получаем полное описание книжной записи (в данном случае это поля "25" и "32")
+        for (int i = 0; i < strDesc.Length; i++)
+        {
+            //ZDesc_25 (Получаем сведения относящиеся к заглавию)
+            if (strDesc[i] == "25")
+                Console.WriteLine("Сведения относящиеся к заглавию: \n" + KAPI32.CreateCustomQuery("SELECT Name FROM ZDesc_25 WHERE ID=" + strText[i]));
+
+            //ZDesc_32 (Получаем объем книги (в страницах))
+            if (strDesc[i] == "32")
+                Console.WriteLine("Кол-во страниц: \n" + KAPI32.CreateCustomQuery("SELECT Name FROM ZDesc_32 WHERE ID=" + strText[i]));
+
+            /*В данном случае, можно вызвать метод Replace у функции CreateCustomQuery (так как тип возврата является string) и заменить
+             * текст "Name\n" на "", чтобы вывести результат запроса без лишнего текста, простым значением*/
+        }
+    }
+
+    if (KAPI32.CloseDataBase())
+        Console.WriteLine("Соединение с базой данных было закрыто.");
+}
+...
+```
+Код продемонстрированный выше является всего лишь примером того, как это можно сделать и как это происходит внутри самой программы `КАБИС`.<br>
+При помощи этой информации Вы сможете сделать полноценную интеграцию библиотечной программы `КАБИС` с другими корпоративными системами. В будущем, я постараюсь сделать получение информации с дополнительных полей библиографической записи немного удобней, без использования того метода, что был продемонстрирован в коде выше.
 
 # Заключение
 Вы можете использовать все функции экспорта так, как захотите, всё зависит только от Вашего воображения. Теперь, при помощи данного инструмента у Вас появится возможность интеграции библиотечной системы KABIS с другими корпоративными системами, по крайней мере у меня.<br><br>
